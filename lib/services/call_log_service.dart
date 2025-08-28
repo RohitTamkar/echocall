@@ -3,7 +3,7 @@ import 'package:call_log/call_log.dart' as cl;
 import 'package:echocall/models/call_entry.dart';
 
 class CallLogService {
-  Future<List<CallEntryModel>> fetchRecent({int days = 14, int? limit}) async {
+  Future<List<CallEntryModel>> fetchRecent({int days = 1, int? limit}) async {
     if (!Platform.isAndroid) return [];
     final now = DateTime.now();
     final from = now.subtract(Duration(days: days)).millisecondsSinceEpoch;
@@ -29,7 +29,7 @@ class CallLogService {
   CallEntryModel _mapEntry(cl.CallLogEntry e) {
     final direction = _mapType(e.callType);
     final ts = e.timestamp ?? 0;
-    final id = '${e.number ?? 'unknown'}_${ts}_${direction.name}';
+    final id = '${e.number ?? 'unknown'}_${direction.name}';
     return CallEntryModel(
       id: id,
       number: e.number ?? '',

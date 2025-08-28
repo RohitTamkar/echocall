@@ -54,7 +54,7 @@ class CallLogStore extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final items = await _callLogService.fetchRecent(days: 14);
+      final items = await _callLogService.fetchRecent(days: 1);
       _all = items;
     } finally {
       _loading = false;
