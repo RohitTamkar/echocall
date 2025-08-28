@@ -1,0 +1,123 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:echocall/providers/sync_store.dart';
+import 'package:echocall/services/permission_service.dart';
+import 'package:echocall/theme.dart';
+
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool checking = false;
+  bool phoneGranted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    setState(() => checking = true);
+    phoneGranted = await PermissionService().hasPhonePermission();
+    setState(() => checking = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sync = context.watch<SyncStore>();
+    final cs = Theme.of(context).colorScheme;
+    return ListView(padding: const EdgeInsets.all(AppSpacing.s16), children: [
+      if (!Platform.isAndroid)
+        _TileCard(
+          title: 'Platform not supported',
+          subtitle: 'iOS does not allow accessing call logs. Android is required for call log features.',
+          leading: Icons.info_outline,
+          color: Colors.orange,
+        ),
+      _TileCard(
+        title: 'Permissions',
+        subtitle: phoneGranted ? 'Phone permissions granted' : 'Phone permissions are required to read call logs and detect call events.',
+        leading: phoneGranted ? Icons.verified_user : Icons.lock_outline,
+        action: TextButton(onPressed: () async { await PermissionService().ensureCorePermissions(); _check(); }, child: Text(phoneGranted ? 'Re-check' : 'Grant')),
+      ),
+      const SizedBox(height: AppSpacing.s16),
+      _CardWrap(children: [
+        _SwitchTile(title: 'Auto-sync on call end', value: sync.autoSync, onChanged: sync.setAutoSync),
+        _SwitchTile(title: 'Sync on Wi‑Fi only', value: sync.wifiOnly, onChanged: sync.setWifiOnly),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+          title: const Text('Last sync time'),
+          subtitle: Text(sync.lastSync?.toLocal().toString() ?? 'Never'),
+          leading: const Icon(Icons.history),
+        )
+      ]),
+      const SizedBox(height: AppSpacing.s16),
+      _TileCard(
+        title: 'Firebase status',
+        subtitle: 'Firebase will initialize automatically if configured. Uploads will be queued here.',
+        leading: Icons.cloud_outlined,
+      ),
+      const SizedBox(height: AppSpacing.s16),
+      Container(
+        padding: const EdgeInsets.all(AppSpacing.s16),
+        decoration: BoxDecoration(color: Theme.of(context).brightness == Brightness.light ? Colors.white : cs.surface, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: cs.outline.withValues(alpha: 0.4))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('About', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          const Text('EchoCall securely reads your Android call logs and pushes them to Firebase under the CALL_LOGS collection.'),
+          const SizedBox(height: 6),
+          const Text('Make sure your app is connected to your Firebase project (google-services.json / GoogleService-Info.plist).'),
+        ]),
+      )
+    ]);
+  }
+}
+
+class _SwitchTile extends StatelessWidget {
+  final String title; final bool value; final ValueChanged<bool> onChanged;
+  const _SwitchTile({required this.title, required this.value, required this.onChanged});
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        title: Text(title),
+        value: value,
+        onChanged: onChanged,
+      );
+}
+
+class _TileCard extends StatelessWidget {
+  final String title; final String subtitle; final IconData leading; final Widget? action; final Color? color;
+  const _TileCard({required this.title, required this.subtitle, required this.leading, this.action, this.color});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s16),
+      decoration: BoxDecoration(color: Theme.of(context).brightness == Brightness.light ? Colors.white : cs.surface, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: cs.outline.withValues(alpha: 0.4))),
+      child: Row(children: [
+        Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: (color ?? cs.primary).withValues(alpha: 0.12)), child: Icon(leading, color: color ?? cs.primary)),
+        const SizedBox(width: AppSpacing.s16),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: 6), Text(subtitle, style: Theme.of(context).textTheme.bodySmall)])),
+        if (action != null) action!,
+      ]),
+    );
+  }
+}
+
+class _CardWrap extends StatelessWidget {
+  final List<Widget> children;
+  const _CardWrap({required this.children});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(color: Theme.of(context).brightness == Brightness.light ? Colors.white : cs.surface, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: cs.outline.withValues(alpha: 0.4))),
+      child: Column(children: children),
+    );
+  }
+}
