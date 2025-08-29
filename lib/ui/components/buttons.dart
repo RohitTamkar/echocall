@@ -75,8 +75,9 @@ class _SecondaryChipState extends State<SecondaryChip> {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
           decoration: ShapeDecoration(
             color: hovering && !widget.selected ? cs.surface.withValues(alpha: 0.8) : baseColor,
-            shape: const StadiumBorder(),
-            // side: BorderSide(color: widget.selected ? baseColor : cs.outline.withValues(alpha: 0.6)),
+            shape: StadiumBorder(
+                side: BorderSide(color: widget.selected ? baseColor : cs.outline.withValues(alpha: 0.6))
+            ),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             if (widget.icon != null) ...[

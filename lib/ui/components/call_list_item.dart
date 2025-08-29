@@ -6,7 +6,13 @@ import 'package:echocall/models/call_entry.dart';
 class CallListItem extends StatelessWidget {
   final CallEntryModel entry;
   final VoidCallback onTap;
-  const CallListItem({super.key, required this.entry, required this.onTap});
+  final bool showContactName;
+  const CallListItem({
+    super.key,
+    required this.entry,
+    required this.onTap,
+    this.showContactName = true,
+  });
 
   Color _typeColor(BuildContext context) {
     switch (entry.direction) {
@@ -62,7 +68,12 @@ class CallListItem extends StatelessWidget {
           const SizedBox(width: AppSpacing.s16),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(entry.name ?? entry.number, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                  showContactName ? (entry.name ?? entry.number) : entry.number,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium
+              ),
               const SizedBox(height: 6),
               Row(children: [
                 Icon(Icons.schedule, size: 14, color: Colors.grey),

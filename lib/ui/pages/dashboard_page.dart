@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:echocall/models/call_entry.dart';
 import 'package:echocall/providers/call_log_store.dart';
 import 'package:echocall/ui/components/buttons.dart';
 import 'package:echocall/theme.dart';
@@ -11,9 +12,9 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CallLogStore>(builder: (context, store, _) {
       final total = store.all.length;
-      final incoming = store.all.where((e) => e.direction.name == 'incoming').length;
-      final outgoing = store.all.where((e) => e.direction.name == 'outgoing').length;
-      final missed = store.all.where((e) => e.direction.name == 'missed').length;
+      final incoming = store.all.where((e) => e.direction == CallDirection.incoming).length;
+      final outgoing = store.all.where((e) => e.direction == CallDirection.outgoing).length;
+      final missed = store.all.where((e) => e.direction == CallDirection.missed).length;
       final secs = store.all.fold<int>(0, (p, e) => p + e.durationSeconds);
       final mins = (secs / 60).floor();
 

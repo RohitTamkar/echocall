@@ -5,7 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:echocall/models/call_entry.dart';
 
-class FirebaseSyncService {
+class FirebaseService {
   bool _initialized = false;
   FirebaseFirestore? _db;
 
@@ -25,6 +25,19 @@ class FirebaseSyncService {
       if (kDebugMode) {
         debugPrint('Firebase not initialized: $e');
       }
+    }
+  }
+
+  Future<bool> uploadCallLog(CallEntryModel entry, {String collection = 'CALL_LOGS', String? deviceId}) async {
+    await tryInit();
+    if (!isAvailable || _db == null) return false;
+    try {
+      final doc = _db!.collection(collection).doc(entry.id);
+      await doc.set(entry.toFirestoreMap(deviceId: deviceId), SetOptions(merge: true));
+      return true;
+    } catch (e) {
+      debugPrint('Error uploading call log: $e');
+      return false;
     }
   }
 

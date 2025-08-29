@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:echocall/models/call_entry.dart';
+import 'package:echocall/models/call_group.dart';
 import 'package:echocall/providers/call_log_store.dart';
 import 'package:echocall/providers/filter_store.dart';
 import 'package:echocall/providers/sync_store.dart';
+import 'package:echocall/providers/settings_store.dart';
 import 'package:echocall/ui/components/buttons.dart';
 import 'package:echocall/ui/components/call_list_item.dart';
+import 'package:echocall/ui/components/call_group_item.dart';
 import 'package:echocall/ui/components/empty_state.dart';
 import 'package:echocall/theme.dart';
 
@@ -29,10 +32,49 @@ class _LogsPageState extends State<LogsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<CallLogStore, FilterStore, SyncStore>(
-      builder: (context, store, filter, sync, _) {
-        final sims = {for (final e in store.all) (e.simLabel ?? 'SIM')}.toList();
-        final filtered = store.all.where(filter.matches).toList();
+    return Consumer4<CallLogStore, FilterStore, SyncStore, SettingsStore>(
+      builder: (context, store, filter, sync, settings, _) {
+        // Filter calls by enabled SIMs first
+        final enabledCalls = store.all.where((call) =>
+            settings.isSimEnabled(call.simLabel)
+        ).toList();
+
+        final sims = {for (final e in enabledCalls) (e.simLabel ?? 'SIM')}.toList();
+
+        // Group calls by number if enabled
+        List<Widget> callWidgets;
+        int totalCount;
+
+        if (settings.groupByNumber && settings.loaded) {
+          // Group calls by number
+          final groupedCalls = <String, List<CallEntryModel>>{};
+          for (final call in enabledCalls.where(filter.matches)) {
+            groupedCalls.putIfAbsent(call.number, () => []).add(call);
+          }
+
+          final groups = groupedCalls.values
+              .map((calls) => CallGroup.fromCalls(calls))
+              .where(filter.matchesGroup)
+              .toList()
+            ..sort((a, b) => b.lastCallTime.compareTo(a.lastCallTime));
+
+          totalCount = groups.fold<int>(0, (sum, group) => sum + group.callCount);
+          callWidgets = groups.map((group) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+            child: CallGroupItem(
+              group: group,
+              onTap: () => _showGroupDetails(context, group),
+            ),
+          )).toList();
+        } else {
+          final filtered = enabledCalls.where(filter.matches).toList();
+          totalCount = filtered.length;
+          callWidgets = filtered.map((e) => Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+            child: CallListItem(entry: e, onTap: () => _showDetails(context, e)),
+          )).toList();
+        }
+
         return RefreshIndicator.adaptive(
           onRefresh: () => store.refresh(),
           child: ListView(
@@ -40,25 +82,29 @@ class _LogsPageState extends State<LogsPage> {
             children: [
               _SearchBar(ctrl: _searchCtrl, onChanged: (v) => filter.setQuery(v)),
               const SizedBox(height: AppSpacing.s12),
-              _FilterRow(sims: sims),
+              _FilterRow(sims: sims, groupEnabled: settings.groupByNumber),
               const SizedBox(height: AppSpacing.s16),
               if (store.loading)
                 const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
-              else if (filtered.isEmpty)
+              else if (callWidgets.isEmpty)
                 EmptyState(
                   icon: Icons.call_outlined,
                   title: 'No calls match your filters',
                   message: 'Adjust your SIM/direction filters or clear search to see more calls.',
-                  action: PrimaryButton(label: 'Clear filters', onPressed: () { filter.setSim(null); filter.setDirection(null); filter.setQuery(''); _searchCtrl.clear(); }),
+                  action: PrimaryButton(
+                      label: 'Clear filters',
+                      onPressed: () {
+                        filter.clearAll();
+                        _searchCtrl.clear();
+                      }
+                  ),
                 )
               else
-                ...filtered.map((e) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-                      child: CallListItem(entry: e, onTap: () => _showDetails(context, e)),
-                    )),
+                ...callWidgets,
               const SizedBox(height: AppSpacing.s32),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('${filtered.length} calls', style: Theme.of(context).textTheme.labelMedium),
+                Text('$totalCount ${settings.groupByNumber ? "entries" : "calls"}',
+                    style: Theme.of(context).textTheme.labelMedium),
                 PrimaryButton(
                   label: syncing ? 'Syncing…' : 'Sync to Firebase',
                   icon: Icons.cloud_upload_outlined,
@@ -78,6 +124,79 @@ class _LogsPageState extends State<LogsPage> {
           ),
         );
       },
+    );
+  }
+
+  void _showGroupDetails(BuildContext context, CallGroup group) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.all(AppSpacing.s16),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.s20),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                      ),
+                      child: const Icon(Icons.call, color: Colors.blue),
+                    ),
+                    const SizedBox(width: AppSpacing.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            group.contactName ?? group.number,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          if (group.contactName != null)
+                            Text(
+                              group.number,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+
+              // Call history list
+              Flexible(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.s16),
+                  itemCount: group.calls.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.s8),
+                  itemBuilder: (context, index) {
+                    final call = group.calls[index];
+                    return CallListItem(
+                      entry: call,
+                      onTap: () => _showDetails(context, call),
+                      showContactName: false,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -112,14 +231,15 @@ class _LogsPageState extends State<LogsPage> {
   }
 
   Widget _kv(String k, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(children: [SizedBox(width: 120, child: Text(k, style: const TextStyle(fontWeight: FontWeight.w600))), Expanded(child: Text(v, softWrap: true))]),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(children: [SizedBox(width: 120, child: Text(k, style: const TextStyle(fontWeight: FontWeight.w600))), Expanded(child: Text(v, softWrap: true))]),
+  );
 }
 
 class _FilterRow extends StatelessWidget {
   final List<String> sims;
-  const _FilterRow({required this.sims});
+  final bool groupEnabled;
+  const _FilterRow({required this.sims, this.groupEnabled = false});
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +247,24 @@ class _FilterRow extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(children: [
-        SecondaryChip(label: 'All SIMs', selected: filter.simLabel == null, onChanged: (s) => filter.setSim(null), icon: Icons.sim_card),
-        const SizedBox(width: 8),
-        ...sims.map((s) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: SecondaryChip(label: s, selected: filter.simLabel == s, onChanged: (v) => filter.setSim(v ? s : null), icon: Icons.sim_card_outlined),
-            )),
-        const SizedBox(width: AppSpacing.s16),
+        if (groupEnabled) ...[
+          SecondaryChip(
+            label: 'Grouped',
+            selected: true,
+            onChanged: (_) {},
+            icon: Icons.group_work,
+          ),
+          const SizedBox(width: AppSpacing.s16),
+        ],
+        if (sims.isNotEmpty) ...[
+          SecondaryChip(label: 'All SIMs', selected: filter.simLabel == null, onChanged: (s) => filter.setSim(null), icon: Icons.sim_card),
+          const SizedBox(width: 8),
+          ...sims.map((s) => Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: SecondaryChip(label: s, selected: filter.simLabel == s, onChanged: (v) => filter.setSim(v ? s : null), icon: Icons.sim_card_outlined),
+          )),
+          const SizedBox(width: AppSpacing.s16),
+        ],
         SecondaryChip(label: 'All', selected: filter.direction == null, onChanged: (v) => context.read<FilterStore>().setDirection(null), icon: Icons.all_inclusive),
         const SizedBox(width: 8),
         SecondaryChip(label: 'Incoming', selected: filter.direction == CallDirection.incoming, onChanged: (v) => context.read<FilterStore>().setDirection(v ? CallDirection.incoming : null), icon: Icons.call_received),

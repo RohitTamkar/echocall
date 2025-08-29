@@ -4,6 +4,7 @@ import 'package:echocall/theme.dart';
 import 'package:echocall/providers/call_log_store.dart';
 import 'package:echocall/providers/filter_store.dart';
 import 'package:echocall/providers/sync_store.dart';
+import 'package:echocall/providers/settings_store.dart';
 import 'package:echocall/ui/app_shell.dart';
 
 void main() {
@@ -21,6 +22,11 @@ class EchoCallApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CallLogStore()),
         ChangeNotifierProvider(create: (_) => FilterStore()),
         ChangeNotifierProvider(create: (_) => SyncStore()),
+        ChangeNotifierProvider(create: (ctx) {
+          final store = SettingsStore();
+          store.loadSettings();
+          return store;
+        }),
       ],
       child: MaterialApp(
         title: 'EchoCall',

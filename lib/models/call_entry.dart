@@ -39,44 +39,44 @@ class CallEntryModel {
     int? subscriptionId,
     bool? synced,
   }) => CallEntryModel(
-        id: id ?? this.id,
-        number: number ?? this.number,
-        name: name ?? this.name,
-        direction: direction ?? this.direction,
-        timestamp: timestamp ?? this.timestamp,
-        durationSeconds: durationSeconds ?? this.durationSeconds,
-        simLabel: simLabel ?? this.simLabel,
-        phoneAccountId: phoneAccountId ?? this.phoneAccountId,
-        subscriptionId: subscriptionId ?? this.subscriptionId,
-        synced: synced ?? this.synced,
-      );
+    id: id ?? this.id,
+    number: number ?? this.number,
+    name: name ?? this.name,
+    direction: direction ?? this.direction,
+    timestamp: timestamp ?? this.timestamp,
+    durationSeconds: durationSeconds ?? this.durationSeconds,
+    simLabel: simLabel ?? this.simLabel,
+    phoneAccountId: phoneAccountId ?? this.phoneAccountId,
+    subscriptionId: subscriptionId ?? this.subscriptionId,
+    synced: synced ?? this.synced,
+  );
 
   Map<String, dynamic> toFirestoreMap({String? deviceId}) => {
-        'id': id,
-        'number': number,
-        'name': name,
-        'direction': direction.name,
-        'timestamp': timestamp.toUtc().millisecondsSinceEpoch,
-        'durationSeconds': durationSeconds,
-        'simLabel': simLabel,
-        'phoneAccountId': phoneAccountId,
-        'subscriptionId': subscriptionId,
-        'deviceId': deviceId,
-        'createdAt': DateTime.now().toUtc().millisecondsSinceEpoch,
-      };
+    'id': id,
+    'number': number,
+    'name': name,
+    'direction': direction.name,
+    'timestamp': timestamp.toUtc().millisecondsSinceEpoch,
+    'durationSeconds': durationSeconds,
+    'simLabel': simLabel,
+    'phoneAccountId': phoneAccountId,
+    'subscriptionId': subscriptionId,
+    'deviceId': deviceId,
+    'createdAt': DateTime.now().toUtc().millisecondsSinceEpoch,
+  };
 
   static CallEntryModel fromMap(Map<String, dynamic> map) => CallEntryModel(
-        id: map['id']?.toString() ?? '',
-        number: map['number']?.toString() ?? '',
-        name: map['name']?.toString(),
-        direction: _directionFromString(map['direction']?.toString()),
-        timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] is int ? map['timestamp'] : int.tryParse('${map['timestamp']}') ?? 0, isUtc: true).toLocal(),
-        durationSeconds: map['durationSeconds'] is int ? map['durationSeconds'] : int.tryParse('${map['durationSeconds']}') ?? 0,
-        simLabel: map['simLabel']?.toString(),
-        phoneAccountId: map['phoneAccountId']?.toString(),
-        subscriptionId: map['subscriptionId'] is int ? map['subscriptionId'] : int.tryParse('${map['subscriptionId']}'),
-        synced: map['synced'] == true,
-      );
+    id: map['id']?.toString() ?? '',
+    number: map['number']?.toString() ?? '',
+    name: map['name']?.toString(),
+    direction: _directionFromString(map['direction']?.toString()),
+    timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] is int ? map['timestamp'] : int.tryParse('${map['timestamp']}') ?? 0, isUtc: true).toLocal(),
+    durationSeconds: map['durationSeconds'] is int ? map['durationSeconds'] : int.tryParse('${map['durationSeconds']}') ?? 0,
+    simLabel: map['simLabel']?.toString(),
+    phoneAccountId: map['phoneAccountId']?.toString(),
+    subscriptionId: map['subscriptionId'] is int ? map['subscriptionId'] : int.tryParse('${map['subscriptionId']}'),
+    synced: map['synced'] == true,
+  );
 
   static CallDirection _directionFromString(String? v) {
     switch (v) {

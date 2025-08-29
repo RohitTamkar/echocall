@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:echocall/providers/sync_store.dart';
+import 'package:echocall/providers/settings_store.dart';
+import 'package:echocall/providers/call_log_store.dart';
 import 'package:echocall/services/permission_service.dart';
 import 'package:echocall/theme.dart';
 
@@ -31,7 +33,17 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final sync = context.watch<SyncStore>();
+    final settings = context.watch<SettingsStore>();
+    final callStore = context.watch<CallLogStore>();
     final cs = Theme.of(context).colorScheme;
+
+    // Get available SIM cards
+    final availableSims = callStore.all
+        .map((e) => e.simLabel ?? 'Unknown')
+        .toSet()
+        .toList()
+      ..sort();
+
     return ListView(padding: const EdgeInsets.all(AppSpacing.s16), children: [
       if (!Platform.isAndroid)
         _TileCard(
@@ -47,7 +59,51 @@ class _SettingsPageState extends State<SettingsPage> {
         action: TextButton(onPressed: () async { await PermissionService().ensureCorePermissions(); _check(); }, child: Text(phoneGranted ? 'Re-check' : 'Grant')),
       ),
       const SizedBox(height: AppSpacing.s16),
+
+      // SIM Card Selection
+      if (availableSims.isNotEmpty && settings.loaded) ...[
+        _CardWrap(children: [
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16),
+            title: Text('SIM Card Settings', style: Theme.of(context).textTheme.titleMedium),
+            subtitle: Text('${settings.enabledSims.isEmpty ? availableSims.length : settings.enabledSims.length} of ${availableSims.length} SIMs enabled'),
+            leading: const Icon(Icons.sim_card),
+          ),
+          ...availableSims.map((sim) => _SwitchTile(
+            title: sim,
+            value: settings.isSimEnabled(sim),
+            onChanged: (_) => settings.toggleSim(sim),
+          )),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.s16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => settings.enableAllSims(availableSims),
+                    child: const Text('Enable All'),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => settings.disableAllSims(),
+                    child: const Text('Disable All'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]),
+        const SizedBox(height: AppSpacing.s16),
+      ],
+
       _CardWrap(children: [
+        _SwitchTile(
+          title: 'Group calls by number',
+          value: settings.groupByNumber,
+          onChanged: settings.setGroupByNumber,
+        ),
         _SwitchTile(title: 'Auto-sync on call end', value: sync.autoSync, onChanged: sync.setAutoSync),
         _SwitchTile(title: 'Sync on Wi‑Fi only', value: sync.wifiOnly, onChanged: sync.setWifiOnly),
         ListTile(
@@ -84,10 +140,10 @@ class _SwitchTile extends StatelessWidget {
   const _SwitchTile({required this.title, required this.value, required this.onChanged});
   @override
   Widget build(BuildContext context) => SwitchListTile(
-        title: Text(title),
-        value: value,
-        onChanged: onChanged,
-      );
+    title: Text(title),
+    value: value,
+    onChanged: onChanged,
+  );
 }
 
 class _TileCard extends StatelessWidget {
