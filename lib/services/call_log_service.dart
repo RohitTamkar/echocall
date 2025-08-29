@@ -4,9 +4,9 @@ import 'package:echocall/models/call_entry.dart';
 
 class CallLogService {
     Future<List<CallEntryModel>> getAllCallLogs() async {
-    return await fetchRecent(days: 0); // Get all calls from past year
+    return await fetchRecent(days: 1); // Get all calls from past year
   }
-  Future<List<CallEntryModel>> fetchRecent({int days = 0, int? limit}) async {
+  Future<List<CallEntryModel>> fetchRecent({int days = 1, int? limit}) async {
     if (!Platform.isAndroid) return [];
     final now = DateTime.now();
     final from = now.subtract(Duration(days: days)).millisecondsSinceEpoch;
@@ -18,7 +18,7 @@ class CallLogService {
   }
 
   Future<CallEntryModel?> mostRecentForNumber(String number, {Duration window = const Duration(minutes: 5)}) async {
-    final items = await fetchRecent(days: 0);
+    final items = await fetchRecent(days: 1);
     final n = number.replaceAll(' ', '');
     final now = DateTime.now();
     for (final e in items) {
@@ -43,6 +43,7 @@ class CallLogService {
       simLabel: e.simDisplayName,
       phoneAccountId: e.phoneAccountId,
       subscriptionId: null,
+      simPhoneNumber: null,
     );
   }
 

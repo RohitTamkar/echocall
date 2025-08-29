@@ -1,3 +1,4 @@
+import 'package:echocall/ui/pages/FirebaseLogsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:echocall/theme.dart';
 import 'package:echocall/ui/pages/dashboard_page.dart';
@@ -38,7 +39,24 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text(['Dashboard','Logs','Settings'][idx], style: Theme.of(context).textTheme.titleLarge)),
+      appBar: AppBar(
+        title: idx == 1
+            ? GestureDetector(
+          onLongPress: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const FirebaseLogsPage()),
+            );
+          },
+          child: Text(
+            "Logs",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        )
+            : Text(
+          ['Dashboard', 'Logs', 'Settings'][idx],
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
       body: AnimatedSwitcher(
         duration: AppDurations.med,
         switchInCurve: Curves.easeOut,

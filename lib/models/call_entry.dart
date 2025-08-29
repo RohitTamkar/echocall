@@ -9,6 +9,7 @@ class CallEntryModel {
   final CallDirection direction;
   final DateTime timestamp;
   final int durationSeconds;
+  final String? simPhoneNumber;
   final String? simLabel; // e.g., SIM1 / Carrier name
   final String? phoneAccountId; // Android account id
   final int? subscriptionId; // Android subscription id
@@ -24,6 +25,7 @@ class CallEntryModel {
     this.simLabel,
     this.phoneAccountId,
     this.subscriptionId,
+    this.simPhoneNumber,
     this.synced = false,
   });
 
@@ -33,6 +35,7 @@ class CallEntryModel {
     String? name,
     CallDirection? direction,
     DateTime? timestamp,
+    String? simPhoneNumber,
     int? durationSeconds,
     String? simLabel,
     String? phoneAccountId,
@@ -46,6 +49,7 @@ class CallEntryModel {
     timestamp: timestamp ?? this.timestamp,
     durationSeconds: durationSeconds ?? this.durationSeconds,
     simLabel: simLabel ?? this.simLabel,
+    simPhoneNumber: simPhoneNumber ?? this.simPhoneNumber,
     phoneAccountId: phoneAccountId ?? this.phoneAccountId,
     subscriptionId: subscriptionId ?? this.subscriptionId,
     synced: synced ?? this.synced,
@@ -59,6 +63,7 @@ class CallEntryModel {
     'timestamp': timestamp.toUtc().millisecondsSinceEpoch,
     'durationSeconds': durationSeconds,
     'simLabel': simLabel,
+    'simPhoneNumber': simPhoneNumber,
     'phoneAccountId': phoneAccountId,
     'subscriptionId': subscriptionId,
     'deviceId': deviceId,
@@ -73,6 +78,7 @@ class CallEntryModel {
     timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] is int ? map['timestamp'] : int.tryParse('${map['timestamp']}') ?? 0, isUtc: true).toLocal(),
     durationSeconds: map['durationSeconds'] is int ? map['durationSeconds'] : int.tryParse('${map['durationSeconds']}') ?? 0,
     simLabel: map['simLabel']?.toString(),
+    simPhoneNumber: map['simPhoneNumber']?.toString(),
     phoneAccountId: map['phoneAccountId']?.toString(),
     subscriptionId: map['subscriptionId'] is int ? map['subscriptionId'] : int.tryParse('${map['subscriptionId']}'),
     synced: map['synced'] == true,

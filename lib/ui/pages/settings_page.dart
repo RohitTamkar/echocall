@@ -120,17 +120,17 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: Icons.cloud_outlined,
       ),
       const SizedBox(height: AppSpacing.s16),
-      Container(
-        padding: const EdgeInsets.all(AppSpacing.s16),
-        decoration: BoxDecoration(color: Theme.of(context).brightness == Brightness.light ? Colors.white : cs.surface, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: cs.outline.withValues(alpha: 0.4))),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('About', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          const Text('EchoCall securely reads your Android call logs and pushes them to Firebase under the CALL_LOGS collection.'),
-          const SizedBox(height: 6),
-          const Text('Make sure your app is connected to your Firebase project (google-services.json / GoogleService-Info.plist).'),
-        ]),
-      )
+      // Container(
+      //   padding: const EdgeInsets.all(AppSpacing.s16),
+      //   decoration: BoxDecoration(color: Theme.of(context).brightness == Brightness.light ? Colors.white : cs.surface, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: cs.outline.withValues(alpha: 0.4))),
+      //   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      //     Text('About', style: Theme.of(context).textTheme.titleMedium),
+      //     const SizedBox(height: 8),
+      //     const Text('EchoCall securely reads your Android call logs and pushes them to Firebase under the CALL_LOGS collection.'),
+      //     const SizedBox(height: 6),
+      //     const Text('Make sure your app is connected to your Firebase project (google-services.json / GoogleService-Info.plist).'),
+      //   ]),
+      // )
     ]);
   }
 }
