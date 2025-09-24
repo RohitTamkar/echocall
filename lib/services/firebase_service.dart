@@ -42,9 +42,16 @@ class FirebaseService {
       final prefs = await SharedPreferences.getInstance();
       final userMobile = prefs.getString("mobile") ?? "unknown";
       final userName = prefs.getString("name") ?? "unknown";
-      // final department = prefs.getString("department") ?? "unknown";
-
+      final department = prefs.getString("department") ?? "unknown";
+      final enabledSims = prefs.getStringList("enabled_sims") ?? [];
       // 🔹 Prepare Firestore doc
+      // ✅ Skip upload if SIM is not enabled
+      final simLabel = entry.simLabel ?? "unknown";
+      if (!enabledSims.contains(simLabel)) {
+        debugPrint("Skipping upload: SIM $simLabel not in enabled list");
+        return false;
+      }
+
       final doc = _db!.collection(collection).doc(entry.id);
 
       // 🔹 Merge call log data + user info
@@ -52,7 +59,7 @@ class FirebaseService {
         ...entry.toFirestoreMap(deviceId: deviceId),
         "receiverMobileNo": userMobile,
         "receiverName": userName,
-        // "department":department,
+        "department":department,
         "uploadedAt": DateTime.now().toIso8601String(), // optional
       };
 

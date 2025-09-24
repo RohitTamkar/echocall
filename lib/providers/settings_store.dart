@@ -11,8 +11,8 @@ class SettingsStore extends ChangeNotifier {
   bool get loaded => _loaded;
 
   Future<void> loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    _enabledSims = (prefs.getStringList('enabled_sims') ?? []).toSet();
+      final prefs = await SharedPreferences.getInstance();
+      _enabledSims = (prefs.getStringList('enabled_sims') ?? []).toSet();
     _groupByNumber = prefs.getBool('group_by_number') ?? true;
     _loaded = true;
     notifyListeners();
