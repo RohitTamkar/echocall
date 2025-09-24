@@ -9,7 +9,8 @@ class CallLogService {
   Future<List<CallEntryModel>> fetchRecent({int days = 1, int? limit}) async {
     if (!Platform.isAndroid) return [];
     final now = DateTime.now();
-    final from = now.subtract(Duration(days: days)).millisecondsSinceEpoch;
+    final todayStart = DateTime(now.year, now.month, now.day, 0, 1);
+    int from = todayStart.millisecondsSinceEpoch;
     final Iterable<cl.CallLogEntry> raw = await cl.CallLog.query(dateFrom: from);
     final items = raw.map(_mapEntry).where((e) => e.number.isNotEmpty).toList();
     items.sort((a, b) => b.timestamp.compareTo(a.timestamp));

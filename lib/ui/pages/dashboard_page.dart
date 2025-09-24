@@ -4,6 +4,7 @@ import 'package:echocall/models/call_entry.dart';
 import 'package:echocall/providers/call_log_store.dart';
 import 'package:echocall/ui/components/buttons.dart';
 import 'package:echocall/theme.dart';
+import 'package:echocall/auth_service.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -50,11 +51,34 @@ class DashboardPage extends StatelessWidget {
     });
   }
 }
+class _Header extends StatefulWidget {
+  @override
+  State<_Header> createState() => _HeaderState();
+}
+class _HeaderState extends State<_Header> {
+  String? mobile;
+  String? userName;
 
-class _Header extends StatelessWidget {
+  @override
+  void initState() {
+    super.initState();
+    _loadMobile();
+  }
+
+  Future<void> _loadMobile() async {
+    final number = await AuthService().getLoggedInMobileNo();
+    var name=await AuthService().getLoggedInUserName();
+    if (mounted) {
+      setState(() {
+        mobile = number;
+        userName=name;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s20),
       decoration: BoxDecoration(
@@ -66,7 +90,25 @@ class _Header extends StatelessWidget {
         Container(width: 52, height: 52, decoration: BoxDecoration(shape: BoxShape.circle, color: cs.primaryContainer), child: Icon(Icons.analytics, color: cs.onPrimaryContainer)),
         const SizedBox(width: AppSpacing.s16),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('EchoCall', style: Theme.of(context).textTheme.headlineSmall),
+          Row(
+            children: [
+              Text(
+                "$userName",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              if (mobile != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  "($mobile)",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: cs.primary),
+                ),
+              ],
+            ],
+          ),
+
           const SizedBox(height: 6),
           Text('Track and sync your call activity with ease', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: cs.onSurface.withValues(alpha: 0.7))),
         ])),

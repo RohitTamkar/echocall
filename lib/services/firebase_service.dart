@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:echocall/models/call_entry.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseService {
   bool _initialized = false;
@@ -28,12 +29,34 @@ class FirebaseService {
     }
   }
 
-  Future<bool> uploadCallLog(CallEntryModel entry, {String collection = 'CALL_LOGS', String? deviceId}) async {
+  Future<bool> uploadCallLog(
+      CallEntryModel entry, {
+        String collection = 'CALL_LOGS',
+        String? deviceId,
+      }) async {
     await tryInit();
     if (!isAvailable || _db == null) return false;
+
     try {
+      // 🔹 Get logged-in user info from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userMobile = prefs.getString("mobile") ?? "unknown";
+      final userName = prefs.getString("name") ?? "unknown";
+      // final department = prefs.getString("department") ?? "unknown";
+
+      // 🔹 Prepare Firestore doc
       final doc = _db!.collection(collection).doc(entry.id);
-      await doc.set(entry.toFirestoreMap(deviceId: deviceId), SetOptions(merge: true));
+
+      // 🔹 Merge call log data + user info
+      final data = {
+        ...entry.toFirestoreMap(deviceId: deviceId),
+        "receiverMobileNo": userMobile,
+        "receiverName": userName,
+        // "department":department,
+        "uploadedAt": DateTime.now().toIso8601String(), // optional
+      };
+
+      await doc.set(data, SetOptions(merge: true));
       return true;
     } catch (e) {
       debugPrint('Error uploading call log: $e');

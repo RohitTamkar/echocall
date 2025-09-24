@@ -14,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.sensible.callLogs"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion  // ✅ This is 34 in your Flutter version
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -58,6 +58,10 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
 
+    // ✅ Pin androidx.core to last version that works with SDK 34
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.core:core:1.12.0"
+
     // Required for Java 8+ APIs
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.5"
 }
@@ -66,5 +70,13 @@ dependencies {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "11"
+    }
+}
+
+// ✅ Global resolution strategy to avoid higher androidx.core versions sneaking in
+configurations.all {
+    resolutionStrategy {
+        force "androidx.core:core-ktx:1.12.0"
+        force "androidx.core:core:1.12.0"
     }
 }
