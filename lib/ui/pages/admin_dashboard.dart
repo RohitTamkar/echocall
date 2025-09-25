@@ -169,8 +169,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       backgroundColor: LightModeColors.lightAppBarBackground,
       elevation: 0,
       title: Text(
-        'Call Logs Dashboard',
-        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+        'Admin Dashboard',
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
           color: LightModeColors.lightOnSurface,
           fontWeight: FontWeight.w600,
         ),
@@ -186,10 +186,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
           )
         else ...[
+          // const SizedBox(width: 16),
           _buildExportButton(Icons.picture_as_pdf, 'Export PDF', _exportToPdf),
-          const SizedBox(width: 8),
-          _buildExportButton(Icons.table_view, 'Export Excel', _exportToExcel),
           const SizedBox(width: 16),
+          // _buildExportButton(Icons.table_view, 'Export Excel', _exportToExcel),
+          // const SizedBox(width: 16),
         ],
       ],
     );

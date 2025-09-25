@@ -112,7 +112,7 @@ class CallLogService {
   }
 
 
-    Future<List<CallEntryModel>> getAllCallLogs() async {
+  Future<List<CallEntryModel>> getAllCallLogs() async {
     return await fetchRecent(days: 1); // Get all calls from past year
   }
   Future<List<CallEntryModel>> fetchRecent({int days = 1, int? limit}) async {

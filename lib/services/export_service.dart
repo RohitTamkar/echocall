@@ -186,7 +186,7 @@ class ExportService {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     // Split data into chunks for multiple pages
-    const itemsPerPage = 15;
+    const itemsPerPage = 10;
     final totalPages = (callLogs.length / itemsPerPage).ceil();
     print("📑 Total pages to generate: $totalPages");
 
@@ -229,35 +229,42 @@ class ExportService {
                   5: const pw.FlexColumnWidth(1),
                   6: const pw.FlexColumnWidth(1),
                   7: const pw.FlexColumnWidth(1),
+                  8: const pw.FlexColumnWidth(1),
                 },
                 children: [
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: PdfColors.grey200),
                     children: [
                       _buildTableCell('Name', isHeader: true),
-                      _buildTableCell('Receiver', isHeader: true),
-                      _buildTableCell('Direction', isHeader: true),
                       _buildTableCell('Number', isHeader: true),
-                      _buildTableCell('Department', isHeader: true),
+                      _buildTableCell('Direction', isHeader: true),
+                      _buildTableCell('Receiver', isHeader: true),
+                      _buildTableCell('Rec Number', isHeader: true),
+                      _buildTableCell('Dept', isHeader: true),
                       _buildTableCell('Duration', isHeader: true),
                       _buildTableCell('SIM', isHeader: true),
                       _buildTableCell('Date', isHeader: true),
                     ],
                   ),
+
                   ...pageData.map((log) {
                     print("   📝 Adding log: name=${log.name}, number=${log.receiverMobileNo}, "
                         "duration=${log.formattedDuration}, date=${dateFormat.format(DateTime.fromMillisecondsSinceEpoch(log.createdAt))}");
                     return pw.TableRow(
                       children: [
-                        _buildTableCell(log.name),
-                        _buildTableCell(log.receiverName),
-                        _buildTableCell(log.direction.toUpperCase()),
-                        _buildTableCell(log.receiverMobileNo),
-                        _buildTableCell(log.department),
-                        _buildTableCell(log.formattedDuration),
-                        _buildTableCell(log.simLabel),
-                        _buildTableCell(dateFormat.format(
-                            DateTime.fromMillisecondsSinceEpoch(log.createdAt))),
+                        _buildTableCell(log.name ?? "Not Available"),
+                        _buildTableCell(log.number ?? "Not Available"),
+                        _buildTableCell(log.direction?.toUpperCase() ?? "-"),
+                        _buildTableCell(log.receiverName ?? "-"),
+                        _buildTableCell(log.receiverMobileNo ?? "-"),
+                        _buildTableCell(log.department ?? "-"),
+                        _buildTableCell(log.formattedDuration ?? "-"),
+                        _buildTableCell(log.simLabel ?? "-"),
+                        _buildTableCell(
+                          log.timestamp != null
+                              ? dateFormat.format(DateTime.fromMillisecondsSinceEpoch(log.timestamp))
+                              : "-",
+                        ),
                       ],
                     );
                   }),
