@@ -1,4 +1,5 @@
 import 'package:echocall/ui/pages/FirebaseLogsPage.dart';
+import 'package:echocall/ui/pages/admin_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:echocall/theme.dart';
 import 'package:echocall/ui/pages/dashboard_page.dart';
@@ -44,7 +45,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             ? GestureDetector(
           onLongPress: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const FirebaseLogsPage()),
+              MaterialPageRoute(builder: (_) => const AdminDashboard()),
             );
           },
           child: Text(

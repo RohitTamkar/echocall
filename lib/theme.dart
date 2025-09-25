@@ -1,6 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
+
+class LightModeColors {
+  static const lightPrimary = Color(0xFF2563EB);
+  static const lightOnPrimary = Color(0xFFFFFFFF);
+  static const lightPrimaryContainer = Color(0xFFEBF4FF);
+  static const lightOnPrimaryContainer = Color(0xFF1E40AF);
+  static const lightSecondary = Color(0xFF6366F1);
+  static const lightOnSecondary = Color(0xFFFFFFFF);
+  static const lightTertiary = Color(0xFF10B981);
+  static const lightOnTertiary = Color(0xFFFFFFFF);
+  static const lightError = Color(0xFFEF4444);
+  static const lightOnError = Color(0xFFFFFFFF);
+  static const lightErrorContainer = Color(0xFFFEE2E2);
+  static const lightOnErrorContainer = Color(0xFFDC2626);
+  static const lightInversePrimary = Color(0xFF60A5FA);
+  static const lightShadow = Color(0xFF000000);
+  static const lightSurface = Color(0xFFFAFBFC);
+  static const lightOnSurface = Color(0xFF1F2937);
+  static const lightAppBarBackground = Color(0xFFFFFFFF);
+
+  // Dashboard specific colors
+  static const dashboardCardBackground = Color(0xFFFFFFFF);
+  static const dashboardSidebarBackground = Color(0xFFF8FAFC);
+  static const dashboardBorder = Color(0xFFE5E7EB);
+  static const dashboardSuccess = Color(0xFF10B981);
+  static const dashboardWarning = Color(0xFFF59E0B);
+  static const dashboardDanger = Color(0xFFEF4444);
+  static const dashboardInfo = Color(0xFF3B82F6);
+}
+
+class DarkModeColors {
+  static const darkPrimary = Color(0xFFD4BCCF);
+  static const darkOnPrimary = Color(0xFF38265C);
+  static const darkPrimaryContainer = Color(0xFF4F3D74);
+  static const darkOnPrimaryContainer = Color(0xFFEAE0FF);
+  static const darkSecondary = Color(0xFFCDC3DC);
+  static const darkOnSecondary = Color(0xFF34313F);
+  static const darkTertiary = Color(0xFFF0B6C5);
+  static const darkOnTertiary = Color(0xFF4A2530);
+  static const darkError = Color(0xFFFFB4AB);
+  static const darkOnError = Color(0xFF690005);
+  static const darkErrorContainer = Color(0xFF93000A);
+  static const darkOnErrorContainer = Color(0xFFFFDAD6);
+  static const darkInversePrimary = Color(0xFF684F8E);
+  static const darkShadow = Color(0xFF000000);
+  static const darkSurface = Color(0xFF121212);
+  static const darkOnSurface = Color(0xFFE0E0E0);
+  static const darkAppBarBackground = Color(0xFF4F3D74);
+}
+
+
 // New color palette tokens (do not reuse older ones)
 class AppColorsLight {
   static const primary = Color(0xFF276EF1);
@@ -170,3 +222,5 @@ ThemeData get darkTheme => ThemeData(
     bodySmall: GoogleFonts.inter(fontSize: FontSizes.bodySmall, fontWeight: FontWeight.w400, height: 1.5),
   ),
 );
+
+
