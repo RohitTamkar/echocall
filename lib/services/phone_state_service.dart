@@ -23,17 +23,26 @@ class PhoneStateWatcher {
         case PhoneStateStatus.CALL_ENDED:
         // case PhoneStateStatus.CALL_STARTED:
         // case PhoneStateStatus.CALL_INCOMING:
+          final Set<String> _uploadedCalls = {};
           final number = status.number ?? '';
           if (number.isEmpty) return;
 
           final logs = await _callLogService.fetchRecent(limit: 1);
           if (logs.isNotEmpty) {
+
             final entry = logs.first;
+
+            if (_uploadedCalls.contains(entry.id)) {
+              print("Skipping duplicate upload for ${entry.id}");
+              return;
+            }
+
             final simNumber = await _getSimNumber(entry.simLabel);
             final updatedEntry = entry.copyWith(simPhoneNumber: simNumber);
             print("Phone state: ${status.status}, number: ${status.number}");
             _controller.add(updatedEntry);
             await _firebaseService.uploadCallLog(updatedEntry);
+            _uploadedCalls.add(entry.id);
           }
 
 
