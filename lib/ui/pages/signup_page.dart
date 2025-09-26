@@ -66,7 +66,7 @@ class _SignupPageState extends State<SignupPage> {
               const SizedBox(height: 12),
               DropdownButton<String>(
                 value: _dept,
-                items: ["Sales", "Support", "HR", "Software","Hardware"]
+                items: ["Software", "Support", "Account", "Sales","Software Support","Hardware Support","HR"]
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (val) => setState(() => _dept = val!),

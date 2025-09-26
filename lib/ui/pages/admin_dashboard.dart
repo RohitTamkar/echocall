@@ -27,7 +27,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  final List<String> _departments = ['', 'IT', 'Sales', 'HR', 'Finance', 'Marketing'];
+  final List<String> _departments = ['', "Software", "Support", "Account", "Sales","Software Support","Hardware Support","HR"];
   final List<String> _directions = ['', 'incoming', 'outgoing'];
 
   @override
@@ -149,9 +149,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildFiltersSection(),
-            const SizedBox(height: 24),
             _buildStatsCards(),
+            const SizedBox(height: 24),
+            _buildFiltersSection(),
             const SizedBox(height: 24),
             // Constrain table height to allow vertical scrolling
             SizedBox(
@@ -213,10 +213,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+
   Widget _buildFiltersSection() {
     return Container(
       margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: LightModeColors.dashboardCardBackground,
         borderRadius: BorderRadius.circular(12),
@@ -229,17 +229,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Filters',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: LightModeColors.lightOnSurface,
-            ),
+      child: ExpansionTile(
+        title: Text(
+          'Filters',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: LightModeColors.lightOnSurface,
           ),
-          const SizedBox(height: 16),
+        ),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        childrenPadding: const EdgeInsets.all(24),
+        backgroundColor: LightModeColors.dashboardCardBackground,
+        collapsedIconColor: LightModeColors.lightOnSurface,
+        iconColor: LightModeColors.lightPrimary,
+        children: [
           Wrap(
             spacing: 16,
             runSpacing: 16,
@@ -274,7 +277,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   value: _selectedDepartment,
                   label: 'Department',
                   items: _departments,
-                  onChanged: (value) => setState(() => _selectedDepartment = value ?? ''),
+                  onChanged: (value) =>
+                      setState(() => _selectedDepartment = value ?? ''),
                 ),
               ),
               SizedBox(
@@ -283,7 +287,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   value: _selectedDirection,
                   label: 'Direction',
                   items: _directions,
-                  onChanged: (value) => setState(() => _selectedDirection = value ?? ''),
+                  onChanged: (value) =>
+                      setState(() => _selectedDirection = value ?? ''),
                 ),
               ),
             ],
@@ -293,13 +298,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
             children: [
               ElevatedButton.icon(
                 onPressed: _applyFilters,
-                icon: const Icon(Icons.filter_list, size: 18),
+                icon: const Icon(Icons.filter_list, size: 18,color: Colors.white),
                 label: const Text('Apply Filters'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: LightModeColors.lightPrimary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -309,8 +316,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 label: const Text('Clear'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: LightModeColors.lightOnSurface,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ],
@@ -319,6 +328,114 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
     );
   }
+
+
+  // Widget _buildFiltersSection() {
+  //   return Container(
+  //     margin: const EdgeInsets.all(24),
+  //     padding: const EdgeInsets.all(24),
+  //     decoration: BoxDecoration(
+  //       color: LightModeColors.dashboardCardBackground,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: LightModeColors.dashboardBorder),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withValues(alpha: 0.05),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Filters',
+  //           style: Theme.of(context).textTheme.titleLarge?.copyWith(
+  //             fontWeight: FontWeight.w600,
+  //             color: LightModeColors.lightOnSurface,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Wrap(
+  //           spacing: 16,
+  //           runSpacing: 16,
+  //           children: [
+  //             SizedBox(
+  //               width: 200,
+  //               child: _buildTextField(
+  //                 controller: _nameSearchController,
+  //                 label: 'Search by Name/Number',
+  //                 prefixIcon: Icons.search,
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: 160,
+  //               child: _buildDateField(
+  //                 controller: _startDateController,
+  //                 label: 'Start Date',
+  //                 onTap: () => _selectDate(context, true),
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: 160,
+  //               child: _buildDateField(
+  //                 controller: _endDateController,
+  //                 label: 'End Date',
+  //                 onTap: () => _selectDate(context, false),
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: 140,
+  //               child: _buildDropdown(
+  //                 value: _selectedDepartment,
+  //                 label: 'Department',
+  //                 items: _departments,
+  //                 onChanged: (value) => setState(() => _selectedDepartment = value ?? ''),
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: 140,
+  //               child: _buildDropdown(
+  //                 value: _selectedDirection,
+  //                 label: 'Direction',
+  //                 items: _directions,
+  //                 onChanged: (value) => setState(() => _selectedDirection = value ?? ''),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 20),
+  //         Row(
+  //           children: [
+  //             ElevatedButton.icon(
+  //               onPressed: _applyFilters,
+  //               icon: const Icon(Icons.filter_list, size: 18),
+  //               label: const Text('Apply Filters'),
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: LightModeColors.lightPrimary,
+  //                 foregroundColor: Colors.white,
+  //                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+  //                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //               ),
+  //             ),
+  //             const SizedBox(width: 12),
+  //             OutlinedButton.icon(
+  //               onPressed: _clearFilters,
+  //               icon: const Icon(Icons.clear, size: 18),
+  //               label: const Text('Clear'),
+  //               style: OutlinedButton.styleFrom(
+  //                 foregroundColor: LightModeColors.lightOnSurface,
+  //                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+  //                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -433,14 +550,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
             children: [
               Icon(icon, color: color, size: 24),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: 16),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.all(8),
+              //   decoration: BoxDecoration(
+              //     color: color.withValues(alpha: 0.1),
+              //     borderRadius: BorderRadius.circular(8),
+              //   ),
+              //   // child: Icon(icon, color: color, size: 16),
+              // ),
             ],
           ),
           const SizedBox(height: 12),

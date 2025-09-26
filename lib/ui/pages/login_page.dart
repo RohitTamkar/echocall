@@ -66,13 +66,15 @@ class _LoginPageState extends State<LoginPage> {
                     : const Text("Login"),
               ),
               TextButton(
-                onPressed: () {
+                onLongPress: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const SignupPage()),
                   );
                 },
-                child: const Text("Create Account"),
+                onPressed: () {  },
+                // child: const Text("Create Account"),
+                child: const Text(""),
               ),
             ],
           ),

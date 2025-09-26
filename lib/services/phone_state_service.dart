@@ -21,8 +21,8 @@ class PhoneStateWatcher {
       if (status == null) return;
       switch (status.status) {
         case PhoneStateStatus.CALL_ENDED:
-        case PhoneStateStatus.CALL_STARTED:
-        case PhoneStateStatus.CALL_INCOMING:
+        // case PhoneStateStatus.CALL_STARTED:
+        // case PhoneStateStatus.CALL_INCOMING:
           final number = status.number ?? '';
           if (number.isEmpty) return;
 
@@ -60,11 +60,6 @@ class PhoneStateWatcher {
       final simData = await SimDataPlugin.getSimData();
       for (final card in simData.cards) {
         if (card.displayName == simLabel || card.carrierName == simLabel) {
-          print(card.serialNumber);
-          print(card.mcc);
-          print(card.mnc);
-          print(card.slotIndex);
-          print(card.subscriptionId);
           return card.serialNumber;
         }
       }
