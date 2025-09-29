@@ -14,9 +14,18 @@ class PermissionService {
   }
 
   Future<bool> ensureCorePermissions() async {
-    if (!Platform.isAndroid) return false;
+    final statuses = await [
+      Permission.phone,
+      Permission.contacts,
+      Permission.sms,
+    ].request();
 
-    final status = await Permission.phone.request();
-    return status.isGranted;
+    return statuses.values.every((status) => status.isGranted);
   }
+  // Future<bool> ensureCorePermissions() async {
+  //   if (!Platform.isAndroid) return false;
+  //
+  //   final status = await Permission.phone.request();
+  //   return status.isGranted;
+  // }
 }
