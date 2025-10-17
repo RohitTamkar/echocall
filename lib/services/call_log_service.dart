@@ -1,52 +1,94 @@
 import 'dart:io';
 import 'package:call_log/call_log.dart' as cl;
+import 'package:echocall/constants/app_constants.dart';
+import 'package:echocall/constants/firebase_collections.dart';
 import 'package:echocall/models/call_entry.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:echocall/models/call_log.dart';
 
 class CallLogService {
-  static const String _collectionName = 'CALL_LOGS';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Pass outletId from your app (based on logged-in device or user)
 
-  Stream<List<CallLog>> getCallLogsStream() {
+  CollectionReference _callLogsRef(String outletId) {
     return _firestore
-        .collection(_collectionName)
+        .collection(FirebaseCollectionsConstants.outlet)
+        .doc(outletId)
+        .collection(FirebaseCollectionsConstants.callLogs);
+  }
+
+  // 🔹 Stream of call logs
+  Stream<List<CallLog>> getCallLogsStream() {
+    return _callLogsRef(AppConstants.outletId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) {
+        .map((snapshot) => snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       final logData = Map<String, dynamic>.from(data);
       logData['id'] = doc.id;
       return CallLog.fromMap(logData);
-    })
-        .toList());
+    }).toList());
   }
 
+  // Stream<List<CallLog>> getCallLogsStream() {
+  //   return _firestore
+  //       .collection(_collectionName)
+  //       .orderBy('createdAt', descending: true)
+  //       .snapshots()
+  //       .map((snapshot) => snapshot.docs
+  //       .map((doc) {
+  //     final data = doc.data() as Map<String, dynamic>;
+  //     final logData = Map<String, dynamic>.from(data);
+  //     logData['id'] = doc.id;
+  //     return CallLog.fromMap(logData);
+  //   })
+  //       .toList());
+  // }
+
+
+  // 🔹 Get logs by date range
   Future<List<CallLog>> getCallLogsByDateRange(DateTime startDate, DateTime endDate) async {
     final startTimestamp = startDate.millisecondsSinceEpoch;
     final endTimestamp = endDate.millisecondsSinceEpoch;
 
-    final snapshot = await _firestore
-        .collection(_collectionName)
+    final snapshot = await _callLogsRef(AppConstants.outletId)
         .where('createdAt', isGreaterThanOrEqualTo: startTimestamp)
         .where('createdAt', isLessThanOrEqualTo: endTimestamp)
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
-        .map((doc) {
+    return snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       final logData = Map<String, dynamic>.from(data);
       logData['id'] = doc.id;
       return CallLog.fromMap(logData);
-    })
-        .toList();
+    }).toList();
   }
 
+  // Future<List<CallLog>> getCallLogsByDateRange(DateTime startDate, DateTime endDate) async {
+  //   final startTimestamp = startDate.millisecondsSinceEpoch;
+  //   final endTimestamp = endDate.millisecondsSinceEpoch;
+  //
+  //   final snapshot = await _firestore
+  //       .collection(_collectionName)
+  //       .where('createdAt', isGreaterThanOrEqualTo: startTimestamp)
+  //       .where('createdAt', isLessThanOrEqualTo: endTimestamp)
+  //       .orderBy('createdAt', descending: true)
+  //       .get();
+  //
+  //   return snapshot.docs
+  //       .map((doc) {
+  //     final data = doc.data() as Map<String, dynamic>;
+  //     final logData = Map<String, dynamic>.from(data);
+  //     logData['id'] = doc.id;
+  //     return CallLog.fromMap(logData);
+  //   })
+  //       .toList();
+  // }
+
+  // 🔹 Search by name
   Future<List<CallLog>> searchCallLogsByName(String name) async {
-    final snapshot = await _firestore
-        .collection(_collectionName)
+    final snapshot = await _callLogsRef(AppConstants.outletId)
         .orderBy('createdAt', descending: true)
         .get();
 
@@ -63,6 +105,26 @@ class CallLogService {
         .toList();
   }
 
+  // Future<List<CallLog>> searchCallLogsByName(String name) async {
+  //   final snapshot = await _firestore
+  //       .collection(_collectionName)
+  //       .orderBy('createdAt', descending: true)
+  //       .get();
+  //
+  //   return snapshot.docs
+  //       .map((doc) {
+  //     final data = doc.data() as Map<String, dynamic>;
+  //     final logData = Map<String, dynamic>.from(data);
+  //     logData['id'] = doc.id;
+  //     return CallLog.fromMap(logData);
+  //   })
+  //       .where((log) =>
+  //   log.name.toLowerCase().contains(name.toLowerCase()) ||
+  //       log.receiverName.toLowerCase().contains(name.toLowerCase()))
+  //       .toList();
+  // }
+
+  // 🔹 Filtered logs with optional parameters
   Future<List<CallLog>> getFilteredCallLogs({
     DateTime? startDate,
     DateTime? endDate,
@@ -70,7 +132,7 @@ class CallLogService {
     String? departmentFilter,
     String? directionFilter,
   }) async {
-    Query query = _firestore.collection(_collectionName);
+    Query query = _callLogsRef(AppConstants.outletId);
 
     if (startDate != null && endDate != null) {
       query = query
@@ -89,14 +151,12 @@ class CallLogService {
     query = query.orderBy('createdAt', descending: true);
 
     final snapshot = await query.get();
-    var results = snapshot.docs
-        .map((doc) {
+    var results = snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       final logData = Map<String, dynamic>.from(data);
       logData['id'] = doc.id;
       return CallLog.fromMap(logData);
-    })
-        .toList();
+    }).toList();
 
     if (nameFilter != null && nameFilter.isNotEmpty) {
       results = results
@@ -110,6 +170,54 @@ class CallLogService {
 
     return results;
   }
+
+  // Future<List<CallLog>> getFilteredCallLogs({
+  //   DateTime? startDate,
+  //   DateTime? endDate,
+  //   String? nameFilter,
+  //   String? departmentFilter,
+  //   String? directionFilter,
+  // }) async {
+  //   Query query = _firestore.collection(_collectionName);
+  //
+  //   if (startDate != null && endDate != null) {
+  //     query = query
+  //         .where('createdAt', isGreaterThanOrEqualTo: startDate.millisecondsSinceEpoch)
+  //         .where('createdAt', isLessThanOrEqualTo: endDate.millisecondsSinceEpoch);
+  //   }
+  //
+  //   if (departmentFilter != null && departmentFilter.isNotEmpty) {
+  //     query = query.where('department', isEqualTo: departmentFilter);
+  //   }
+  //
+  //   if (directionFilter != null && directionFilter.isNotEmpty) {
+  //     query = query.where('direction', isEqualTo: directionFilter);
+  //   }
+  //
+  //   query = query.orderBy('createdAt', descending: true);
+  //
+  //   final snapshot = await query.get();
+  //   var results = snapshot.docs
+  //       .map((doc) {
+  //     final data = doc.data() as Map<String, dynamic>;
+  //     final logData = Map<String, dynamic>.from(data);
+  //     logData['id'] = doc.id;
+  //     return CallLog.fromMap(logData);
+  //   })
+  //       .toList();
+  //
+  //   if (nameFilter != null && nameFilter.isNotEmpty) {
+  //     results = results
+  //         .where((log) =>
+  //     log.name.toLowerCase().contains(nameFilter.toLowerCase()) ||
+  //         log.receiverName.toLowerCase().contains(nameFilter.toLowerCase()) ||
+  //         log.number.contains(nameFilter) ||
+  //         log.receiverMobileNo.contains(nameFilter))
+  //         .toList();
+  //   }
+  //
+  //   return results;
+  // }
 
 
   Future<List<CallEntryModel>> getAllCallLogs() async {

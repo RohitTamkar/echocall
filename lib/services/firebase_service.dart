@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:echocall/constants/app_constants.dart';
+import 'package:echocall/constants/firebase_collections.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:echocall/models/call_entry.dart';
@@ -29,58 +31,135 @@ class FirebaseService {
     }
   }
 
-  Future<bool> uploadCallLog(
-      CallEntryModel entry, {
-        String collection = 'CALL_LOGS',
-        String? deviceId,
-      }) async {
+
+  Future<bool> uploadCallLog(CallEntryModel entry, {
+    String? deviceId,
+  }) async {
     await tryInit();
     if (!isAvailable || _db == null) return false;
 
     try {
-      // 🔹 Get logged-in user info from SharedPreferences
+      // 🔹 Get logged-in user info
       final prefs = await SharedPreferences.getInstance();
       final userMobile = prefs.getString("mobile") ?? "unknown";
       final userName = prefs.getString("name") ?? "unknown";
       final department = prefs.getString("department") ?? "unknown";
       final enabledSims = prefs.getStringList("enabled_sims") ?? [];
-      // 🔹 Prepare Firestore doc
-      // ✅ Skip upload if SIM is not enabled
       final simLabel = entry.simLabel ?? "unknown";
+
+      // Skip if SIM not enabled
       if (!enabledSims.contains(simLabel)) {
         debugPrint("Skipping upload: SIM $simLabel not in enabled list");
         return false;
       }
 
-      final doc = _db!.collection(collection).doc(entry.id);
+      // 🔹 Firestore path: OUTLET/{outletId}/CALL_LOGS/{entry.id}
+      final outletId = AppConstants.outletId;
+      final docRef = _db!
+          .collection(FirebaseCollectionsConstants.outlet)
+          .doc(outletId)
+          .collection(FirebaseCollectionsConstants.callLogs)
+          .doc(entry.id);
 
-      // 🔹 Merge call log data + user info
+      // 🔹 Build data map
       final data = {
         ...entry.toFirestoreMap(deviceId: deviceId),
         "receiverMobileNo": userMobile,
         "receiverName": userName,
-        "department":department,
-        "uploadedAt": DateTime.now().toIso8601String(), // optional
+        "department": department,
+        "uploadedAt": DateTime.now().toIso8601String(),
       };
 
-      await doc.set(data, SetOptions(merge: true));
+      // 🔹 Upload to Firestore
+      await docRef.set(data, SetOptions(merge: true));
+      debugPrint("✅ Uploaded call log for ${entry.number}");
       return true;
     } catch (e) {
-      debugPrint('Error uploading call log: $e');
+      debugPrint('❌ Error uploading call log: $e');
       return false;
     }
   }
 
-  Future<int> uploadBatch(List<CallEntryModel> entries, {String collection = 'CALL_LOGS', String? deviceId}) async {
+  // Future<bool> uploadCallLog(
+  //     CallEntryModel entry, {
+  //       String collection = 'CALL_LOGS',
+  //       String? deviceId,
+  //     }) async {
+  //   await tryInit();
+  //   if (!isAvailable || _db == null) return false;
+  //   try {
+  //     // 🔹 Get logged-in user info from SharedPreferences
+  //     final prefs = await SharedPreferences.getInstance();
+  //     final userMobile = prefs.getString("mobile") ?? "unknown";
+  //     final userName = prefs.getString("name") ?? "unknown";
+  //     final department = prefs.getString("department") ?? "unknown";
+  //     final enabledSims = prefs.getStringList("enabled_sims") ?? [];
+  //     final simLabel = entry.simLabel ?? "unknown";
+  //     if (!enabledSims.contains(simLabel)) {
+  //       debugPrint("Skipping upload: SIM $simLabel not in enabled list");
+  //       return false;
+  //     }
+  //     final doc = _db!.collection(collection).doc(entry.id);
+  //     final data = {
+  //       ...entry.toFirestoreMap(deviceId: deviceId),
+  //       "receiverMobileNo": userMobile,
+  //       "receiverName": userName,
+  //       "department":department,
+  //       "uploadedAt": DateTime.now().toIso8601String(), // optional
+  //     };
+  //     await doc.set(data, SetOptions(merge: true));
+  //     return true;
+  //   } catch (e) {
+  //     debugPrint('Error uploading call log: $e');
+  //     return false;
+  //   }
+  // }
+
+
+  Future<int> uploadBatch(List<CallEntryModel> entries, {
+    String? deviceId,
+  }) async {
     await tryInit();
     if (!isAvailable || _db == null) return 0;
-    final batch = _db!.batch();
-    final col = _db!.collection(collection);
-    for (final e in entries) {
-      final doc = col.doc(e.id);
-      batch.set(doc, e.toFirestoreMap(deviceId: deviceId), SetOptions(merge: true));
+
+    try {
+      final outletId = AppConstants.outletId;
+      final colRef = _db!
+          .collection(FirebaseCollectionsConstants.outlet)
+          .doc(outletId)
+          .collection(FirebaseCollectionsConstants.callLogs);
+
+      final batch = _db!.batch();
+
+      for (final e in entries) {
+        final docRef = colRef.doc(e.id);
+        batch.set(
+          docRef,
+          e.toFirestoreMap(deviceId: deviceId),
+          SetOptions(merge: true),
+        );
+      }
+
+      await batch.commit();
+      debugPrint("✅ Uploaded ${entries.length} call logs to OUTLET/$outletId");
+      return entries.length;
+    } catch (e) {
+      debugPrint("❌ Error in uploadBatch: $e");
+      return 0;
     }
-    await batch.commit();
-    return entries.length;
   }
+
 }
+//   Future<int> uploadBatch(List<CallEntryModel> entries, {String collection = 'CALL_LOGS', String? deviceId}) async {
+//     await tryInit();
+//     if (!isAvailable || _db == null) return 0;
+//     final batch = _db!.batch();
+//     final col = _db!.collection(collection);
+//     for (final e in entries) {
+//       final doc = col.doc(e.id);
+//       batch.set(doc, e.toFirestoreMap(deviceId: deviceId), SetOptions(merge: true));
+//     }
+//     await batch.commit();
+//     return entries.length;
+//   }
+// }

@@ -56,6 +56,7 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: _pinCtrl,
                 obscureText: true,
+                keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(labelText: "PIN"),
               ),
               const SizedBox(height: 20),
@@ -65,17 +66,17 @@ class _LoginPageState extends State<LoginPage> {
                     ? const CircularProgressIndicator()
                     : const Text("Login"),
               ),
-              TextButton(
-                onLongPress: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignupPage()),
-                  );
-                },
-                onPressed: () {  },
-                // child: const Text("Create Account"),
-                child: const Text(""),
-              ),
+              // TextButton(
+              //   onLongPress: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (_) => const SignupPage()),
+              //     );
+              //   },
+              //   onPressed: () {  },
+              //   // child: const Text("Create Account"),
+              //   child: const Text(""),
+              // ),
             ],
           ),
         ),

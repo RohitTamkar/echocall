@@ -29,9 +29,7 @@ class PhoneStateWatcher {
 
           final logs = await _callLogService.fetchRecent(limit: 1);
           if (logs.isNotEmpty) {
-
             final entry = logs.first;
-
             if (_uploadedCalls.contains(entry.id)) {
               print("Skipping duplicate upload for ${entry.id}");
               return;

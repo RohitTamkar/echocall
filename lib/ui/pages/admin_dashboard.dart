@@ -27,7 +27,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  final List<String> _departments = ['', "Software", "Support", "Account", "Sales","Software Support","Hardware Support","HR"];
+    final List<String> _departments = ['', "Software", "Account", "Sales","Software Support","Hardware Support","HR"];
   final List<String> _directions = ['', 'incoming', 'outgoing'];
 
   @override

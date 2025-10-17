@@ -92,55 +92,12 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-// class DashboardPage extends StatelessWidget {
-//   const DashboardPage({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer<CallLogStore>(builder: (context, store, _) {
-//       final total = store.all.length;
-//       final incoming = store.all.where((e) => e.direction == CallDirection.incoming).length;
-//       final outgoing = store.all.where((e) => e.direction == CallDirection.outgoing).length;
-//       final missed = store.all.where((e) => e.direction == CallDirection.missed).length;
-//       final secs = store.all.fold<int>(0, (p, e) => p + e.durationSeconds);
-//       final mins = (secs / 60).floor();
-//
-//       return ListView(
-//         padding: const EdgeInsets.all(AppSpacing.s16),
-//         children: [
-//           _Header(),
-//           const SizedBox(height: AppSpacing.s16),
-//           Wrap(spacing: AppSpacing.s16, runSpacing: AppSpacing.s16, children: [
-//             _StatCard(title: 'Total calls', value: '$total', icon: Icons.call, color: Colors.blue),
-//             _StatCard(title: 'Incoming', value: '$incoming', icon: Icons.call_received, color: Colors.green),
-//             _StatCard(title: 'Outgoing', value: '$outgoing', icon: Icons.call_made, color: Colors.indigo),
-//             _StatCard(title: 'Missed', value: '$missed', icon: Icons.call_missed_outgoing, color: Colors.red),
-//             _StatCard(title: 'Talk time', value: '${mins}m', icon: Icons.schedule, color: Colors.orange),
-//           ]),
-//           const SizedBox(height: AppSpacing.s24),
-//           Card(
-//             child: Padding(
-//               padding: const EdgeInsets.all(AppSpacing.s20),
-//               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-//                 Text('Quick actions', style: Theme.of(context).textTheme.titleMedium),
-//                 const SizedBox(height: AppSpacing.s12),
-//                 Row(children: [
-//                   Expanded(child: PrimaryButton(label: 'Refresh logs', icon: Icons.refresh, onPressed: () => store.refresh())),
-//                   const SizedBox(width: AppSpacing.s12),
-//                   Expanded(child: PrimaryButton(label: 'Upload all', icon: Icons.cloud_upload_outlined, onPressed: () => store.uploadAllUnsynced())),
-//                 ])
-//               ]),
-//             ),
-//           ),
-//         ],
-//       );
-//     });
-//   }
-// }
 class _Header extends StatefulWidget {
   @override
   State<_Header> createState() => _HeaderState();
 }
+
+
 class _HeaderState extends State<_Header> {
   String? mobile;
   String? userName;
@@ -164,7 +121,6 @@ class _HeaderState extends State<_Header> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(AppSpacing.s20),
       decoration: BoxDecoration(
@@ -180,23 +136,21 @@ class _HeaderState extends State<_Header> {
             children: [
               Text(
                 "$userName",
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              if (mobile != null) ...[
-                const SizedBox(width: 8),
-                Text(
-                  "($mobile)",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: cs.primary),
-                ),
-              ],
             ],
           ),
-
           const SizedBox(height: 6),
-          Text('Track and sync your call activity with ease', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: cs.onSurface.withValues(alpha: 0.7))),
+          if (mobile != null) ...[
+            const SizedBox(width: 8),
+            Text(
+              "($mobile)",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(color: cs.primary),
+            ),
+          ],
         ])),
       ]),
     );
