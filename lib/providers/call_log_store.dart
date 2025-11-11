@@ -9,16 +9,18 @@ class CallLogStore extends ChangeNotifier {
 
   List<CallEntryModel> _all = [];
   bool _loading = false;
+  bool _initialized = false;
 
   List<CallEntryModel> get all => List.unmodifiable(_all);
   bool get loading => _loading;
 
-  CallLogStore() {
-    _initialize();
-  }
+  CallLogStore();
 
-  Future<void> _initialize() async {
-    await refresh();
+  // Explicit initialization
+  Future<void> init() async {
+    if (_initialized) return; // Prevent multiple calls
+    _initialized = true;
+    await refresh(); // Load call logs now
   }
 
   Future<void> refresh() async {

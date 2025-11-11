@@ -17,7 +17,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await initializeService();
+  // await initializeService();
   runApp(const EchoCallApp());
 }
 
@@ -25,6 +25,21 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
+
+  // Create an "ongoing" notification channel
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'sensiblecall_service',
+    'SensibleCall Background Service',
+    description: 'Keeps EchoCall running in the background to monitor calls.',
+    importance: Importance.defaultImportance, // avoid showing heads-up
+    playSound: false,
+    showBadge: false,
+  );
+
+  final androidPlugin = flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>();
+  await androidPlugin?.createNotificationChannel(channel);
 
   await service.configure(
     androidConfiguration: AndroidConfiguration(
@@ -45,15 +60,35 @@ Future<void> initializeService() async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   await Firebase.initializeApp();
-  // 🔔 Update notification if needed
+
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   if (service is AndroidServiceInstance) {
     service.setForegroundNotificationInfo(
       title: "SensibleCall",
       content: "Still monitoring calls…",
     );
+
+    await flutterLocalNotificationsPlugin.show(
+      888,
+      'SensibleCall',
+      'Still monitoring calls…',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'sensiblecall_service',
+          'SensibleCall Background Service',
+          channelDescription:
+          'Keeps SensibleCall running in the background to monitor phone calls.',
+          ongoing: true, // 🔒 persistent
+          autoCancel: false,
+          importance: Importance.low,
+          priority: Priority.low,
+          playSound: false,
+        ),
+      ),
+    );
   }
 
-  // Here you can start your PhoneStateWatcher
   final watcher = PhoneStateWatcher();
   watcher.start();
 }
