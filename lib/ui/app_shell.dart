@@ -5,6 +5,8 @@ import 'package:echocall/theme.dart';
 import 'package:echocall/ui/pages/dashboard_page.dart';
 import 'package:echocall/ui/pages/logs_page.dart';
 import 'package:echocall/ui/pages/settings_page.dart';
+import 'package:echocall/ui/components/consent_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -34,6 +36,14 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
       default:
         return const LogsPage();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ensureUserConsent(context);
+    });
   }
 
   @override
